@@ -19,7 +19,7 @@ class TemperatureProperty extends Property {
   constructor(device, name, propertyDescr) {
     console.log("creating property...");
     super(device, name, propertyDescr);
-	  this.setValue(0);
+    this.setValue(0);
     this.device.notifyPropertyChanged(this);
   }
 
@@ -31,7 +31,7 @@ class TemperatureProperty extends Property {
    * the value passed in.
    */
   setValue(value) {
-	  console.log("Setting value to " + value);
+    console.log("Setting value to " + value);
     this.value = (value);
     this.device.notifyPropertyChanged(this);
   }
@@ -65,14 +65,14 @@ class TemperatureDevice extends Device {
         {
           '@type': 'TemperatureProperty',
           type: 'temperature',
-	  title: 'Temperature',
+          title: 'Temperature',
           readOnly: true,
         })
 
     this.properties.set(
-      'temp1',
-    prop
-      );
+        'temp1',
+        prop
+    );
 
     client.on('message', function (topic, message) {
       const t = JSON.parse(message)['temperature_C'];
@@ -110,7 +110,7 @@ class TemperatureAdapter extends Adapter {
 function loadRtl433Adapter(addonManager, manifest, _errorCallback) {
   console.log("creating adapter...");
   const promise = Promise.resolve();
-  
+
   promise.then(() => new TemperatureAdapter(addonManager, manifest));
 }
 
