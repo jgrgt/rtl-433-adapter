@@ -8,7 +8,7 @@
 
 'use strict';
 
-var mqtt = require('mqtt')
+var mqtt = require('mqtt');
 
 const {Adapter, Database, Device, Event, Property} = require('gateway-addon');
 
@@ -78,7 +78,7 @@ class TemperatureDevice extends Device {
         console.log('Rcvd topic:', topic, 'message:', message.toString());
 
         const topicNames = topic.split('/');
-        if (topicNames.length == 2) {
+        if (topicNames.length === 2) {
           const propertyName = topicNames[1];
           const property = this.properties.get(propertyName);
           if (property) {
