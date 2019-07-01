@@ -53,7 +53,7 @@ class TemperatureDevice extends Device {
 
     this.temperatureProperty = new TemperatureProperty(
         this,
-        'Temperature',
+        'temp1',
         {
           title: 'Temperature',
           type: 'number',
@@ -63,9 +63,14 @@ class TemperatureDevice extends Device {
           maximum: 50,
           readOnly: true,
         });
+    this.properties.set(
+        'temp1',
+        this.temperatureProperty
+    );
+
     this.humidityProperty = new HumidityProperty(
         this,
-        'Humidity',
+        'hum1',
         {
           title: 'Humidity',
           type: 'integer',
@@ -77,11 +82,7 @@ class TemperatureDevice extends Device {
         });
 
     this.properties.set(
-        'temperature',
-        this.temperatureProperty
-    );
-    this.properties.set(
-        'humidity',
+        'hum1',
         this.humidityProperty
     );
     console.log("device added...");
