@@ -46,7 +46,7 @@ class TemperatureDevice extends Device {
     super(adapter, deviceId);
 
     this.name = deviceId;
-    this['@type'] = ['TemperatureSensor'];
+    this['@type'] = ['TemperatureSensor', 'MultiLevelSensor'];
 
     console.log(`Creating device ${deviceId}...`);
     this.sensorId = id;
@@ -68,9 +68,9 @@ class TemperatureDevice extends Device {
         'Humidity',
         {
           title: 'Humidity',
-          type: 'number',
+          type: 'integer',
           '@type': 'LevelProperty',
-          unit: 'degree celsius',
+          unit: 'percent',
           minimum: 0,
           maximum: 100,
           readOnly: true,
