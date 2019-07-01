@@ -33,9 +33,9 @@ class HumidityProperty extends Property {
     super(device, name, propertyDescr);
   }
 
-  update(temperature) {
+  update(humidity) {
     console.log('Updating humidity to', humidity);
-    this.setCachedValue(temperature);
+    this.setCachedValue(humidity);
     this.device.notifyPropertyChanged(this);
   }
 }
