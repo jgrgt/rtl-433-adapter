@@ -44,6 +44,7 @@ class TemperatureDevice extends Device {
     super(adapter, deviceId);
 
     console.log(`Creating device ${deviceId}...`);
+    this.sensorId = id;
 
     this.temperatureProperty = new TemperatureProperty(
         this,
@@ -153,7 +154,7 @@ class TemperatureAdapter extends Adapter {
 
       console.log('Looking for device');
       devices.forEach((device) => {
-        if (device.id === id) {
+        if (device.sensorId === id) {
           console.log('Found device', id);
           if (msg.hasOwnProperty('temperature_C')) {
             device.updateTemperature(msg.temperature_C)
