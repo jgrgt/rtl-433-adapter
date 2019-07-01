@@ -116,8 +116,8 @@ class TemperatureAdapter extends Adapter {
     const client = mqtt.connect('mqtt://localhost:1883');
 
     const config = new Config('sensors', [
-      new SensorConfig('128', 'Tuinhuis'),
-      new SensorConfig('174', 'Serre'),
+      new SensorConfig(128, 'Tuinhuis'),
+      new SensorConfig(174, 'Serre'),
     ]);
 
     const devices = [];
