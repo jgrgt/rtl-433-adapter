@@ -45,6 +45,9 @@ class TemperatureDevice extends Device {
     const deviceId = `${id}-${name}`;
     super(adapter, deviceId);
 
+    this.name = deviceId;
+    this['@type'] = ['TemperatureSensor'];
+
     console.log(`Creating device ${deviceId}...`);
     this.sensorId = id;
 
@@ -83,9 +86,6 @@ class TemperatureDevice extends Device {
     );
     console.log("device added...");
     this.adapter.handleDeviceAdded(this);
-
-    this.name = "temperature";
-    this['@type'] = ['TemperatureSensor'];
   }
 
   updateTemperature(temperature) {
