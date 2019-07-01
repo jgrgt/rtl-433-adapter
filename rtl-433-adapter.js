@@ -117,7 +117,7 @@ class TemperatureAdapter extends Adapter {
 
     const config = new Config('sensors', [
       new SensorConfig('128', 'Tuinhuis'),
-      new SensorConfig('244', 'Serre'),
+      new SensorConfig('174', 'Serre'),
     ]);
 
     const devices = [];
@@ -154,6 +154,7 @@ class TemperatureAdapter extends Adapter {
       console.log('Looking for device');
       devices.forEach((device) => {
         if (device.id === id) {
+          console.log('Found device', id);
           if (msg.hasOwnProperty('temperature_C')) {
             device.updateTemperature(msg.temperature_C)
           }
