@@ -16,47 +16,38 @@ const {Adapter, Database, Device, Event, Property} = require('gateway-addon');
 
 class TemperatureProperty extends Property {
   constructor(device, name, propertyDescr) {
-    console.log("creating property...");
+    console.log("creating temperature property...");
     super(device, name, propertyDescr);
-
-    const topic = `${this.device.name}/${this.name}`;
-    this.device.client.subscribe(topic, (err) => {
-      if (err) {
-        console.error('Failed to subscribe to topic', topic);
-      } else {
-        console.log('Subscribed to topic', topic);
-      }
-    });
   }
 
-  onMessage(message) {
-    const msg = JSON.parse(message);
-    if (msg.hasOwnProperty('temperature_C')) {
-      this.setCachedValue(msg.temperature_C);
-      this.device.notifyPropertyChanged(this);
-    }
+  update(temperature) {
+    this.setCachedValue(temperature);
+    this.device.notifyPropertyChanged(this);
+  }
+}
+
+class HumidityProperty extends Property {
+  constructor(device, name, propertyDescr) {
+    console.log("creating humidity property...");
+    super(device, name, propertyDescr);
+  }
+
+  update(temperature) {
+    this.setCachedValue(temperature);
+    this.device.notifyPropertyChanged(this);
   }
 }
 
 class TemperatureDevice extends Device {
-  constructor(adapter) {
-    const id = `rtl-433-test`;
-    super(adapter, id);
+  constructor(adapter, id, name) {
+    const deviceId = `${id}-${name}`;
+    super(adapter, deviceId);
 
-    console.log("creating device...");
+    console.log(`Creating device ${deviceId}...`);
 
-    const client = mqtt.connect('mqtt://localhost:1883');
-    this.client = client;
-
-    this.name = "temperature";
-    this['@type'] = ['TemperatureSensor'];
-
-    console.log('connecting...');
-    client.on('connect', () => {
-      console.log('Connected to MQTT broker');
-      const property = new TemperatureProperty(
+    this.temperatureProperty = new TemperatureProperty(
         this,
-        'temp1',
+        'Temperature',
         {
           title: 'Temperature',
           type: 'number',
@@ -64,33 +55,53 @@ class TemperatureDevice extends Device {
           unit: 'degree celsius',
           minimum: -20,
           maximum: 50,
-            readOnly: true,
+          readOnly: true,
+        });
+    this.humidityProperty = new HumidityProperty(
+        this,
+        'Humidity',
+        {
+          title: 'Humidity',
+          type: 'number',
+          '@type': 'LevelProperty',
+          unit: 'degree celsius',
+          minimum: 0,
+          maximum: 100,
+          readOnly: true,
         });
 
-      this.properties.set(
-          'temp1',
-          property
-      );
-      console.log("device added...");
-      this.adapter.handleDeviceAdded(this);
+    this.properties.set(
+        'temperature',
+        this.temperatureProperty
+    );
+    this.properties.set(
+        'humidity',
+        this.humidityProperty
+    );
+    console.log("device added...");
+    this.adapter.handleDeviceAdded(this);
 
-      client.on('message', (topic, message) => {
-        console.log('Rcvd topic:', topic, 'message:', message.toString());
+    this.name = "temperature";
+    this['@type'] = ['TemperatureSensor'];
+  }
 
-        const topicNames = topic.split('/');
-        if (topicNames.length === 2) {
-          const propertyName = topicNames[1];
-          const property = this.properties.get(propertyName);
-          if (property) {
-            property.onMessage(message.toString());
-          } else {
-            console.error('No property named', propertyName);
-          }
-        } else {
-          console.error('Unrecognized topic:', topic);
-        }
-      });
-    });
+  updateTemperature(temperature) {
+    this.temperatureProperty.update(temperature);
+  }
+}
+
+class SensorConfig {
+  constructor(id, name) {
+    this.id = id;
+    this.name = name;
+  }
+
+}
+
+class Config {
+  constructor(topic, devices) {
+    this.topic = topic;
+    this.devices = devices;
   }
 }
 
@@ -98,7 +109,57 @@ class TemperatureAdapter extends Adapter {
   constructor(addonManager, manifest) {
     super(addonManager, manifest.name, manifest.name);
     addonManager.addAdapter(this);
-    new TemperatureDevice(this);
+    const client = mqtt.connect('mqtt://localhost:1883');
+    this.client = client;
+
+    const config = new Config('sensors', [
+      new SensorConfig('128', 'Tuinhuis'),
+      new SensorConfig('244', 'Serre'),
+    ]);
+
+    const devices = [];
+
+    config.devices.forEach(deviceConfig => {
+      const device = new TemperatureDevice(this, deviceConfig.id, deviceConfig.name);
+      devices.push(device);
+    });
+
+    console.log('Connecting...');
+    client.on('connect', () => {
+      console.log('Connected to MQTT broker');
+
+      client.subscribe(config.topic, (err) => {
+        if (err) {
+          console.error('Failed to subscribe to topic', config.topic);
+        } else {
+          console.log('Subscribed to topic', config.topic);
+        }
+      });
+
+    });
+
+    client.on('message', (topic, message) => {
+      console.log('Rcvd topic:', topic, 'message:', message.toString());
+
+      const msg = JSON.parse(message.toString());
+      if (!msg.hasOwnProperty('id')) {
+        console.log('Unknown message type, no ID!');
+        return;
+      }
+      const id = msg.id;
+
+      console.log('Looking for device');
+      devices.forEach((device) => {
+        if (device.id === id) {
+          if (msg.hasOwnProperty('temperature_C')) {
+            device.updateTemperature(msg.temperature_C)
+          }
+          if (msg.hasOwnProperty('humidity')) {
+            device.updateHumidity(msg.humidity)
+          }
+        }
+      });
+    });
   }
 }
 
