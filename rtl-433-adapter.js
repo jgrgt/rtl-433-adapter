@@ -21,6 +21,7 @@ class TemperatureProperty extends Property {
   }
 
   update(temperature) {
+    console.log('Updating temperature to', temperature);
     this.setCachedValue(temperature);
     this.device.notifyPropertyChanged(this);
   }
@@ -33,6 +34,7 @@ class HumidityProperty extends Property {
   }
 
   update(temperature) {
+    console.log('Updating humidity to', humidity);
     this.setCachedValue(temperature);
     this.device.notifyPropertyChanged(this);
   }
