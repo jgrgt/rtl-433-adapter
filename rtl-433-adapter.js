@@ -88,6 +88,10 @@ class TemperatureDevice extends Device {
   updateTemperature(temperature) {
     this.temperatureProperty.update(temperature);
   }
+
+  updateHumidity(humidity) {
+    this.humidityProperty.update(humidity);
+  }
 }
 
 class SensorConfig {
@@ -110,7 +114,6 @@ class TemperatureAdapter extends Adapter {
     super(addonManager, manifest.name, manifest.name);
     addonManager.addAdapter(this);
     const client = mqtt.connect('mqtt://localhost:1883');
-    this.client = client;
 
     const config = new Config('sensors', [
       new SensorConfig('128', 'Tuinhuis'),
